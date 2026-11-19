@@ -1,0 +1,502 @@
+<title>Markdown Press</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Code+Pro:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:ital,wght@0,400;0,700;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,700;1,8..60,400;1,8..60,700&display=swap">
+<style>
+/* Layout: a press desk — tool strip on top, manuscript (editor) left, proof sheet (preview) right; tabs at phone width. */
+:root {
+  --desk: #E6E9EE;
+  --panel: #FBFBFC;
+  --ink: #18202B;
+  --ink-2: #4B5563;
+  --line: #CDD3DC;
+  --line-soft: #E2E6EC;
+  --paper: #FFFFFF;
+  --paper-ink: #1F2329;
+  --paper-muted: #545C69;
+  --paper-rule: #D3D8E0;
+  --paper-code: #F3F4F7;
+  --accent: #2B4ACB;
+  --on-accent: #FFFFFF;
+  --focus: #2B4ACB;
+  --shadow: 0 1px 2px rgba(24,32,43,.06), 0 8px 28px rgba(24,32,43,.10);
+  --f-display: "Bricolage Grotesque", "IBM Plex Sans", system-ui, sans-serif;
+  --f-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "Source Code Pro", ui-monospace, Menlo, Consolas, monospace;
+  --f-doc-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-doc-sans: "Source Sans 3", Calibri, "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --desk: #12161C; --panel: #1A1F27; --ink: #E7EAEF; --ink-2: #A3ACB9; --line: #333B47; --line-soft: #262D37;
+    --focus: #8EA4FF; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.45); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --desk: #12161C; --panel: #1A1F27; --ink: #E7EAEF; --ink-2: #A3ACB9; --line: #333B47; --line-soft: #262D37;
+  --focus: #8EA4FF; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.45); color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--desk); color: var(--ink); font-family: var(--f-ui); font-size: 14px;
+  display: flex; flex-direction: column; min-height: 0;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+button, select, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* ---------- top bar ---------- */
+.bar {
+  background: var(--panel); border-bottom: 1px solid var(--line);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 10px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px;
+}
+.brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+.mark {
+  width: 30px; height: 30px; border-radius: 7px; background: var(--ink); color: var(--panel);
+  display: grid; place-items: center; font-family: var(--f-display); font-weight: 700; font-size: 15px; letter-spacing: -.02em;
+}
+.brand h1 { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: 19px; letter-spacing: -.015em; }
+.brand p { margin: 0; font-size: 12px; color: var(--ink-2); }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 14px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--panel); cursor: pointer; font-weight: 500; white-space: nowrap;
+}
+.btn:hover { border-color: var(--ink-2); }
+.btn svg { width: 16px; height: 16px; flex: none; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn[disabled] { opacity: .6; cursor: progress; }
+
+/* ---------- settings strip ---------- */
+.strip {
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 8px; border-bottom: 1px solid var(--line-soft);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 22px; font-size: 13px;
+}
+.field { display: flex; align-items: center; gap: 8px; }
+.label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-2); font-weight: 600; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; background: var(--panel); }
+.seg button { border: 0; background: transparent; padding: 5px 11px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+.strip select { height: 30px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); padding: 0 8px; }
+.swatches { display: flex; gap: 6px; }
+.swatch {
+  width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--panel); box-shadow: 0 0 0 1px var(--line);
+  cursor: pointer; padding: 0;
+}
+.swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--ink); }
+.hint { color: var(--ink-2); font-size: 12px; margin-left: auto; }
+
+/* ---------- workspace ---------- */
+.tabs { display: none; }
+.work {
+  flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+}
+.pane { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.pane-head {
+  display: flex; align-items: center; gap: 10px; padding: 8px 16px; font-size: 12px; color: var(--ink-2);
+  border-bottom: 1px solid var(--line-soft);
+}
+.pane-head strong { color: var(--ink); font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pane-head .meta { margin-left: auto; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.editor-pane { background: var(--panel); border-right: 1px solid var(--line); position: relative; }
+#md {
+  flex: 1; min-height: 0; width: 100%; resize: none; border: 0; outline: none; background: transparent;
+  padding: 18px max(16px, env(safe-area-inset-left, 0px)) 40px 20px; font-family: var(--f-mono); font-size: 13.5px; line-height: 1.65;
+  tab-size: 4;
+}
+#md:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--focus); }
+.drop {
+  position: absolute; inset: 8px; border: 2px dashed var(--accent); border-radius: 12px;
+  background: color-mix(in srgb, var(--panel) 88%, var(--accent)); display: grid; place-items: center;
+  font-weight: 600; color: var(--ink); font-size: 15px; pointer-events: none;
+}
+.preview-pane { overflow: auto; }
+.sheet-wrap { padding: 28px 24px 56px; display: flex; justify-content: center; }
+
+/* ---------- the proof sheet ---------- */
+.paper {
+  --base: 11pt;
+  --doc-font: var(--f-doc-serif);
+  background: var(--paper); color: var(--paper-ink); box-shadow: var(--shadow);
+  width: 100%; max-width: 8.5in; min-height: 9in; padding: clamp(28px, 7%, 1in);
+  font-family: var(--doc-font); font-size: var(--base); line-height: 1.28;
+  overflow-wrap: anywhere;
+}
+.paper.a4 { max-width: 210mm; }
+.paper > :first-child { margin-top: 0; }
+.paper h1, .paper h2, .paper h3, .paper h4, .paper h5, .paper h6 { line-height: 1.12; text-wrap: balance; margin: 1em 0 .4em; font-weight: 700; }
+.paper h1 { font-size: calc(var(--base) * 2); color: var(--doc-accent); margin: 1.2em 0 .55em; }
+.paper h2 { font-size: calc(var(--base) * 1.55); color: var(--doc-accent); }
+.paper h3 { font-size: calc(var(--base) * 1.27); color: var(--doc-accent); }
+.paper h4 { font-size: calc(var(--base) * 1.12); }
+.paper h5 { font-size: var(--base); }
+.paper h6 { font-size: calc(var(--base) * .95); font-style: italic; }
+.paper p { margin: 0 0 .75em; }
+.paper a { color: var(--doc-accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+.paper code { font-family: var(--f-mono); font-size: .86em; background: var(--paper-code); padding: .05em .25em; border-radius: 2px; }
+.paper pre { background: var(--paper-code); border: 1px solid var(--paper-rule); padding: 8px 10px; margin: 0 0 .9em; overflow-x: auto; line-height: 1.3; }
+.paper pre code { background: none; padding: 0; font-size: .82rem; font-size: calc(var(--base) * .82); }
+.paper blockquote { margin: 0 0 .6em; padding: 2px 0 0 12px; border-left: 2.5px solid var(--doc-accent); color: var(--paper-muted); font-style: italic; }
+.paper ul, .paper ol { margin: 0 0 .5em; padding-left: 1.5em; }
+.paper li { margin: 0 0 .12em; }
+.paper li > p { margin-bottom: .3em; }
+.paper li::marker { color: #4B5361; }
+.paper li.task { list-style: none; margin-left: -1.3em; }
+.paper li.task input { margin: 0 .45em 0 0; accent-color: var(--doc-accent); vertical-align: -1px; }
+.paper hr { border: 0; border-top: 1px solid #B8BEC8; margin: .5em 0 1.1em; }
+.paper .tbl { overflow-x: auto; margin: 0 0 1em; }
+.paper table { border-collapse: collapse; width: 100%; font-size: .94em; font-variant-numeric: tabular-nums; }
+.paper th, .paper td { border: 1px solid var(--paper-rule); padding: 4px 6px; text-align: left; }
+.paper [align="right"] { text-align: right; } .paper [align="center"] { text-align: center; }
+.paper th { background: #EEF1F5; }
+.paper img { display: block; margin: 4px auto .75em; }
+.paper .img-alt { color: var(--paper-muted); font-style: italic; }
+
+/* ---------- toast ---------- */
+.toast {
+  position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  background: var(--ink); color: var(--panel); padding: 10px 16px; border-radius: 9px; font-weight: 500;
+  box-shadow: var(--shadow); max-width: calc(100% - 32px); z-index: 20;
+}
+
+/* ---------- narrow screens ---------- */
+@media (max-width: 820px) {
+  .hint { display: none; }
+  .tabs {
+    display: flex; gap: 4px; padding-block: 8px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .tabs button { flex: 1; height: 34px; border: 1px solid var(--line); background: var(--panel); border-radius: 8px; cursor: pointer; font-weight: 500; }
+  .tabs button[aria-selected="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+  .work { grid-template-columns: minmax(0, 1fr); }
+  .work[data-view="write"] .preview-pane, .work[data-view="preview"] .editor-pane { display: none; }
+  .editor-pane { border-right: 0; }
+  .sheet-wrap { padding: 16px 12px 40px; }
+  .actions { width: 100%; }
+  .actions .btn { flex: 1; justify-content: center; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .toast { animation: rise .18s ease-out; }
+  @keyframes rise { from { transform: translate(-50%, 6px); opacity: .4; } }
+}
+</style>
+
+<header class="bar">
+  <div class="brand">
+    <div class="mark" aria-hidden="true">M↓</div>
+    <div>
+      <h1>Markdown Press</h1>
+      <p>Markdown in, Word and PDF out</p>
+    </div>
+  </div>
+  <div class="actions">
+    <label class="btn" for="file" title="Open a .md file">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>
+      Open .md
+    </label>
+    <input type="file" id="file" accept=".md,.markdown,.mdown,.txt,text/markdown,text/plain" hidden>
+    <button class="btn primary" id="getDocx" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+      Word (.docx)
+    </button>
+    <button class="btn primary" id="getPdf" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+      PDF
+    </button>
+  </div>
+</header>
+
+<div class="strip" role="group" aria-label="Document settings">
+  <div class="field"><span class="label">Typeface</span>
+    <div class="seg" id="typeface">
+      <button type="button" data-v="serif" aria-pressed="true">Serif</button>
+      <button type="button" data-v="sans" aria-pressed="false">Sans</button>
+    </div>
+  </div>
+  <div class="field"><label class="label" for="size">Size</label>
+    <select id="size"><option value="10">10 pt</option><option value="11" selected>11 pt</option><option value="12">12 pt</option></select>
+  </div>
+  <div class="field"><span class="label">Page</span>
+    <div class="seg" id="page">
+      <button type="button" data-v="letter" aria-pressed="true">Letter</button>
+      <button type="button" data-v="a4" aria-pressed="false">A4</button>
+    </div>
+  </div>
+  <div class="field"><span class="label">Headings</span>
+    <div class="swatches" id="accent"></div>
+  </div>
+  <span class="hint" id="fontHint">Word file uses Georgia &amp; Consolas · 1&Prime; margins</span>
+</div>
+
+<nav class="tabs" role="tablist" aria-label="View">
+  <button type="button" role="tab" id="tabWrite" aria-selected="true">Write</button>
+  <button type="button" role="tab" id="tabPreview" aria-selected="false">Preview</button>
+</nav>
+
+<main class="work" id="work" data-view="write">
+  <section class="pane editor-pane" id="editorPane" aria-label="Markdown source">
+    <div class="pane-head"><strong id="docName">sample.md</strong><span>· drop a file or paste</span><span class="meta" id="count">0 words</span></div>
+    <textarea id="md" spellcheck="false" aria-label="Markdown"></textarea>
+    <div class="drop" id="drop" hidden>Drop your Markdown file</div>
+  </section>
+  <section class="pane preview-pane" aria-label="Preview">
+    <div class="sheet-wrap"><article class="paper" id="paper"></article></div>
+  </section>
+</main>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
+<script>
+/*FONTS*/
+</script>
+<script>
+/*CONVERT*/
+</script>
+<script>
+(function () {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const SAMPLE = /*SAMPLE*/"";
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("mdpress:" + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem("mdpress:" + k, JSON.stringify(v)); } catch (e) {} },
+  };
+
+  const state = Object.assign({ typeface: "serif", size: 11, page: "letter", accent: "cobalt" }, store.get("opts", {}));
+  let docName = store.get("name", "sample.md");
+  const md = $("md");
+  md.value = store.get("draft", SAMPLE);
+
+  /* --- accent swatches --- */
+  const acc = $("accent");
+  Object.entries(MDPress.ACCENTS).forEach(([k, a]) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "swatch"; b.dataset.v = k; b.title = a.label; b.setAttribute("aria-label", a.label + " headings");
+    b.style.background = "#" + a.hex;
+    acc.appendChild(b);
+  });
+
+  function syncControls() {
+    document.querySelectorAll("#typeface button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.v === state.typeface));
+    document.querySelectorAll("#page button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.v === state.page));
+    document.querySelectorAll("#accent button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.v === state.accent));
+    $("size").value = String(state.size);
+    const hex = "#" + MDPress.ACCENTS[state.accent].hex;
+    document.documentElement.style.setProperty("--accent", hex);
+    const p = $("paper");
+    p.style.setProperty("--doc-accent", hex);
+    p.style.setProperty("--base", state.size + "pt");
+    p.style.setProperty("--doc-font", state.typeface === "serif" ? "var(--f-doc-serif)" : "var(--f-doc-sans)");
+    p.classList.toggle("a4", state.page === "a4");
+    $("fontHint").textContent = "Word file uses " + MDPress.TYPEFACES[state.typeface].docx + " & Consolas · 1″ margins";
+    store.set("opts", state);
+  }
+  function bindSeg(id, key) {
+    $(id).addEventListener("click", (e) => {
+      const b = e.target.closest("button"); if (!b) return;
+      state[key] = b.dataset.v; syncControls();
+    });
+  }
+  bindSeg("typeface", "typeface"); bindSeg("page", "page"); bindSeg("accent", "accent");
+  $("size").addEventListener("change", (e) => { state.size = +e.target.value; syncControls(); });
+
+  /* --- preview --- */
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  marked.use({
+    gfm: true,
+    renderer: {
+      html(html) { return /^<br\s*\/?>$/i.test(String(html).trim()) ? "<br>" : esc(html); },
+      table(header, body) { return '<div class="tbl"><table><thead>' + header + "</thead><tbody>" + body + "</tbody></table></div>"; },
+      image(href, title, text) {
+        if (/^data:image\/(png|jpe?g|gif);base64,/i.test(href || "")) return '<img src="' + esc(href) + '" alt="' + esc(text) + '">';
+        return '<span class="img-alt">[' + (text || "image") + "]</span>";
+      },
+      link(href, title, text) {
+        const safe = /^(https?:|mailto:|#)/i.test(href || "") ? esc(href) : "#";
+        return '<a href="' + safe + '" target="_blank" rel="noopener noreferrer">' + text + "</a>";
+      },
+      listitem(text, task, checked) {
+        if (task) return '<li class="task">' + text + "</li>";
+        return "<li>" + text + "</li>";
+      },
+      checkbox(checked) { return '<input type="checkbox" disabled' + (checked ? " checked" : "") + "> "; },
+    },
+  });
+  let t = 0;
+  function render() {
+    $("paper").innerHTML = marked.parse(md.value || "") || '<p style="color:var(--paper-muted)">Your formatted document appears here.</p>';
+    const words = (md.value.match(/[^\s#>*_`|\-]+/g) || []).length;
+    $("count").textContent = words.toLocaleString() + (words === 1 ? " word" : " words");
+    $("docName").textContent = docName;
+  }
+  md.addEventListener("input", () => {
+    clearTimeout(t);
+    t = setTimeout(() => { render(); store.set("draft", md.value); }, 120);
+  });
+  md.addEventListener("keydown", (e) => {
+    if (e.key === "Tab" && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
+      e.preventDefault();
+      const s = md.selectionStart, en = md.selectionEnd;
+      md.setRangeText("    ", s, en, "end");
+      md.dispatchEvent(new Event("input"));
+    }
+  });
+
+  /* --- loading files --- */
+  function loadFile(file) {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast("That file is over 5 MB. Open a smaller Markdown file."); return; }
+    const r = new FileReader();
+    r.onload = () => {
+      md.value = String(r.result);
+      docName = file.name;
+      store.set("name", docName); store.set("draft", md.value);
+      render(); toast("Opened " + file.name);
+    };
+    r.onerror = () => toast("Couldn't read that file. Try opening it again.");
+    r.readAsText(file);
+  }
+  $("file").addEventListener("change", (e) => { loadFile(e.target.files[0]); e.target.value = ""; });
+  const pane = $("editorPane");
+  let depth = 0;
+  pane.addEventListener("dragenter", (e) => { e.preventDefault(); depth++; $("drop").hidden = false; });
+  pane.addEventListener("dragover", (e) => e.preventDefault());
+  pane.addEventListener("dragleave", () => { if (--depth <= 0) { depth = 0; $("drop").hidden = true; } });
+  pane.addEventListener("drop", (e) => {
+    e.preventDefault(); depth = 0; $("drop").hidden = true;
+    const f = e.dataTransfer && e.dataTransfer.files[0];
+    if (f) loadFile(f);
+  });
+
+  /* --- tabs (narrow screens) --- */
+  function view(v) {
+    $("work").dataset.view = v;
+    $("tabWrite").setAttribute("aria-selected", v === "write");
+    $("tabPreview").setAttribute("aria-selected", v === "preview");
+  }
+  $("tabWrite").addEventListener("click", () => view("write"));
+  $("tabPreview").addEventListener("click", () => view("preview"));
+
+  /* --- toast --- */
+  let tt = 0;
+  function toast(msg) {
+    const el = $("toast"); el.textContent = msg; el.hidden = false;
+    clearTimeout(tt); tt = setTimeout(() => (el.hidden = true), 3200);
+  }
+
+  /* --- export --- */
+  function baseName() {
+    let n = docName && docName !== "sample.md" ? docName.replace(/\.(md|markdown|mdown|txt)$/i, "") : MDPress.guessTitle(md.value, "document");
+    n = n.replace(/[\\/:*?"<>|]+/g, "").replace(/\s+/g, " ").trim().slice(0, 80);
+    return n || "document";
+  }
+  async function saveFile(filename, blob) {
+    const host = window.claude && typeof window.claude.use === "function";
+    if (host) {
+      let dl = null;
+      try { dl = await window.claude.use("downloads"); } catch (e) { dl = null; }
+      if (!dl) { toast("Downloads aren't available in this view. Open the app in Claude to save files."); return; }
+      try {
+        const res = await dl.save({ filename, data: blob });
+        toast(res && res.status === "delivered" ? "Sent " + filename : "Saved " + filename);
+      } catch (e) {
+        const c = e && e.code;
+        if (c === "declined") toast("Download cancelled.");
+        else if (c === "rate_limited") toast("A save prompt is already open. Answer it, then try again.");
+        else if (c === "too_large") toast("That file is too large to save here.");
+        else toast("Couldn't save the file here. Downloads aren't available in this view.");
+      }
+      return;
+    }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    toast("Saved " + filename);
+  }
+  function busy(btn, on, label) {
+    btn.disabled = on;
+    if (on) { btn.dataset.label = btn.lastChild.textContent; btn.lastChild.textContent = " " + label; }
+    else if (btn.dataset.label) btn.lastChild.textContent = btn.dataset.label;
+  }
+  const opts = () => Object.assign({}, state, { title: MDPress.guessTitle(md.value, baseName()) });
+
+  $("getDocx").addEventListener("click", async (e) => {
+    const btn = e.currentTarget;
+    if (!md.value.trim()) { toast("Add some Markdown first."); return; }
+    busy(btn, true, "Building…");
+    try {
+      const blob = await MDPress.toDocx(md.value, opts());
+      await saveFile(baseName() + ".docx", blob);
+    } catch (err) { console.error(err); toast("Couldn't build the Word file: " + (err.message || err)); }
+    finally { busy(btn, false); }
+  });
+
+  /* PDF fonts are embedded in the page (window.MDPRESS_FONTS), so nothing is fetched at export time. */
+  function vfsFor(fonts) {
+    const vfs = {};
+    const all = window.MDPRESS_FONTS || {};
+    Object.values(fonts).forEach((f) => Object.values(f).forEach((n) => {
+      if (!all[n]) throw new Error("missing font " + n);
+      vfs[n] = all[n];
+    }));
+    return vfs;
+  }
+  let robotoPromise = null;
+  function loadRoboto() {
+    if (!robotoPromise) robotoPromise = new Promise((res, rej) => {
+      const keep = pdfMake.vfs;
+      const sc = document.createElement("script");
+      sc.src = "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.js";
+      sc.onload = () => { const v = pdfMake.vfs; pdfMake.vfs = keep; v ? res(v) : rej(new Error("fallback fonts unavailable")); };
+      sc.onerror = () => { robotoPromise = null; rej(new Error("fallback fonts unavailable")); };
+      document.head.appendChild(sc);
+    });
+    return robotoPromise;
+  }
+  function buildPdf(dd, fonts, vfs) {
+    return new Promise((res, rej) => {
+      const timer = setTimeout(() => rej(new Error("PDF build timed out")), 30000);
+      try {
+        pdfMake.createPdf(dd, null, fonts, vfs).getBlob((blob) => {
+          clearTimeout(timer);
+          blob && blob.size ? res(blob) : rej(new Error("PDF came out empty"));
+        });
+      } catch (x) { clearTimeout(timer); rej(x); }
+    });
+  }
+  $("getPdf").addEventListener("click", async (e) => {
+    const btn = e.currentTarget;
+    if (!md.value.trim()) { toast("Add some Markdown first."); return; }
+    if (typeof pdfMake === "undefined") { toast("The PDF engine didn't load. Reload the page and try again."); return; }
+    busy(btn, true, "Building…");
+    try {
+      const dd = await MDPress.toPdfDefinition(md.value, opts());
+      let blob;
+      try {
+        const fonts = MDPress.pdfFontMap(state.typeface);
+        blob = await buildPdf(dd, fonts, vfsFor(fonts));
+      } catch (first) {
+        console.warn("PDF with embedded fonts failed, retrying with Roboto", first);
+        const vfs = await loadRoboto();
+        const r = { normal: "Roboto-Regular.ttf", bold: "Roboto-Medium.ttf", italics: "Roboto-Italic.ttf", bolditalics: "Roboto-MediumItalic.ttf" };
+        blob = await buildPdf(await MDPress.toPdfDefinition(md.value, opts()), { Body: r, Mono: r }, vfs);
+      }
+      await saveFile(baseName() + ".pdf", blob);
+    } catch (err) { console.error(err); toast("Couldn't build the PDF: " + (err && err.message || err)); }
+    finally { busy(btn, false); }
+  });
+
+  syncControls();
+  render();
+})();
+</script>
